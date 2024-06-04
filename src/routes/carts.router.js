@@ -6,7 +6,6 @@ const cartsManager = new CartManager();
 
 router.get("/", async (req, res) => {
     const carts = await cartsManager.getCarts();
-
     res.status(200).send(carts);
 });
 

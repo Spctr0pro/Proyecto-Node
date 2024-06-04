@@ -12,7 +12,6 @@ export default class CartManager {
         if (!fs.existsSync(this.#pathCartJSON)) {
             await fs.promises.writeFile(this.#pathCartJSON, "[]");
         }
-        console.log(this.#pathCartJSON);
         const cartsJSON = await fs.promises.readFile(this.#pathCartJSON, "utf8");
         return JSON.parse(cartsJSON);
     }

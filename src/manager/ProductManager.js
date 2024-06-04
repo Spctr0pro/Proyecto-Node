@@ -13,7 +13,6 @@ export default class ProductManager {
             await fs.promises.writeFile(this.#pathProductJSON, "[]");
         }
         const productsJSON = await fs.promises.readFile(this.#pathProductJSON, "utf8");
-        console.log(productsJSON);
         return JSON.parse(productsJSON);
     }
 
