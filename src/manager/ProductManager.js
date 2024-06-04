@@ -5,7 +5,7 @@ export default class ProductManager {
     #pathProductJSON;
 
     constructor() {
-        this.#pathProductJSON = path.join("data", "products.json");
+        this.#pathProductJSON = path.join("src/data", "products.json");
     }
 
     #getProductsPrivate = async () => {
@@ -13,6 +13,7 @@ export default class ProductManager {
             await fs.promises.writeFile(this.#pathProductJSON, "[]");
         }
         const productsJSON = await fs.promises.readFile(this.#pathProductJSON, "utf8");
+        console.log(productsJSON);
         return JSON.parse(productsJSON);
     }
 
@@ -85,7 +86,7 @@ export default class ProductManager {
         return products;
     }
 
-    getProducts = async (limit) => {
+    getProductsLimit = async (limit) => {
         const products = await this.#getProductsPrivate();
         const limitProducts = []
         products.map(product => {

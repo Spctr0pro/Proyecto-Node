@@ -1,16 +1,17 @@
 import { Router } from "express";
-import ProductManager from "../../ProductManager.js";
+import ProductManager from "../manager/ProductManager.js";
 
 const router = Router();
 const productsManager = new ProductManager();
 
 router.get("/", async (req, res) => {
     const { limit } = req.query;
+    let products;
     if(limit === undefined){
-        const products = await productsManager.getProducts();
+        products = await productsManager.getProducts();
         return res.status(200).send({ products });
     }
-    const products = await productsManager.getProducts(limit);
+    products = await productsManager.getProductsLimit(limit);
     return res.status(200).send({ products });
 });
 
