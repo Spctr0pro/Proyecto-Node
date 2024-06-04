@@ -10,6 +10,12 @@ router.get("/", async (req, res) => {
     res.status(200).send(carts);
 });
 
+router.get("/:cid", async (req, res) => {
+    const { cid } = req.params;
+    const carts = await cartsManager.getCartsById(cid);
+    res.status(200).send(carts);
+});
+
 router.post("/", async (req, res) => {
     const { products } = req.body;
     await cartsManager.addCart(products);

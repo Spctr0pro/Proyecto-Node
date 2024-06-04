@@ -5,47 +5,57 @@ const router = Router();
 const productsManager = new ProductManager();
 
 router.get("/", async (req, res) => {
-    const products = await productsManager.getProducts();
-    res.status(200).send({ products });
+    const { limit } = req.query;
+    if(limit === undefined){
+        const products = await productsManager.getProducts();
+        return res.status(200).send({ products });
+    }
+    const products = await productsManager.getProducts(limit);
+    return res.status(200).send({ products });
 });
 
 router.get("/:pid", async (req, res) => {
-    const { pid } = req.params;    
-    if(!pid){
-        return res.status(400).send({"error": "No se envió ningún parámetro"})
+    const { pid } = req.params;
+    if (!pid) {
+        return res.status(400).send({ "error": "No se envió ningún parámetro" })
     }
     const product = await productsManager.getProductById(pid);
     res.status(200).send({ product });
 });
 
 router.post("/", async (req, res) => {
-    const { title, description, code, price, stock, thumbnailes } = req.body;
-    if(!title || !description || !code || !price || !stock){
-        return res.status(400).send({"error": "Debe enviar toda la información necesaria"})
+    const { title, description, code, price, status, stock, thumbnails } = req.body;
+    if (!title || !description || !code || !price || !stock) {
+        return res.status(400).send({ "error": "Debe enviar toda la información necesaria" })
     }
-    await productsManager.addProduct(title, description, code, price, true, stock, thumbnailes)
+    await productsManager.addProduct(title, description, code, price, status, stock, !thumbnails ? [] : thumbnails)
     res.status(201).send({ status: "success" })
 });
 
 router.put("/:pid", async (req, res) => {
     const { pid } = req.params;
-    const { title, description, code, price, status, stock, thumbnailes } = req.body;
-    if(!pid){
-        return res.status(400).send({"error": "No viene el parámetro para actualizar el producto."})
-    }else if(!title || !description || !code || !price || !stock || !status){
-        return res.status(400).send({"error": "Debe enviar toda la información necesaria."})
+    const { title, description, code, price, status, stock, thumbnails } = req.body;
+    if (!pid) {
+        return res.status(400).send({ "error": "No viene el parámetro para actualizar el producto." })
+    } else if (!title || !description || !code || !price || !stock || !status) {
+        return res.status(400).send({ "error": "Debe enviar toda la información necesaria." })
     }
-    await productsManager.updateProduct(pid, title, description, code, price, status, stock, thumbnailes)
+    await productsManager.updateProduct(pid, title, description, code, price, status, stock, !thumbnails ? [] : thumbnails)
     res.status(201).send({ status: "success" })
 });
 
-router.delete("/:pid", (req, res) => {
+router.delete("/:pid", async (req, res) => {
     const { pid } = req.params;
-    if(!pid){
-        return res.status(400).send({"error": "No se envió ningún parámetro"})
+    if (!pid) {
+        return res.status(400).send({ "error": "No se envió ningún parámetro" })
     }
-    products = productsManager.getProducts();// Implementar delete
-    res.status(200).send({ products });
+
+    const product = await productsManager.getProductById(pid);
+    if (product.length === 0) {
+        return res.status(400).send({ "Error": `El producto con el Id ${pid}, no existe` });
+    }
+    await productsManager.deleteProduct(pid);
+    res.status(200).send({ "existo": `Producto con el Id ${pid} fue eliminado exitosamente` });
 });
 
 export default router;

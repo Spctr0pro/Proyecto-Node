@@ -26,7 +26,11 @@ export default class CartManager {
 
     addCart = async (products) => {
         const carts = await this.#getCartsPrivate()
-        const max = Math.max.apply(null, carts.map(item => item.id));
+        let max;
+        if(carts.length > 0){
+            max = Math.max.apply(null, carts.map(item => item.id));
+        }else{ max = 0; }
+        
         const newCart = {
             id: max + 1,// Debe autogenerarse
             products
@@ -40,17 +44,27 @@ export default class CartManager {
         return carts;
     }
 
+    getCartsById = async (cid) => {
+        const carts = await this.#getCartsPrivate();
+        return carts.find(cart => cart.id === Number(cid));
+    }
+
     updateCarts = async (cid, pid) => {
         const carts = await this.#getCartsPrivate();
         
         carts.map((cart) => {
             if(cart.id === Number(cid)){
                 if(cart.products.length > 0){
-                    cart.products.map((product) => {
-                        if(product.id === Number(pid)){
-                            product.quantity = product.quantity + 1; 
-                        }
-                    });
+                    if(cart.products.find(p => p.id === Number(pid))){
+                        cart.products.map((product) => {
+                            if(product.id === Number(pid)){
+                                product.quantity = product.quantity + 1; 
+                            }
+                        });
+                    }
+                    else{
+                        cart.products.push({"id": Number(pid), "quantity": 1})    
+                    }
                 }
                 else{
                     cart.products.push({"id": Number(pid), "quantity": 1})
@@ -59,8 +73,5 @@ export default class CartManager {
         });
         const updateCartsJSON = JSON.stringify(carts, null, "\t");
         await fs.promises.writeFile(this.#pathCartJSON, updateCartsJSON);
-        return carts.find((cart) => {
-            return cart.id === Number(cid)
-        });
     }
 }
