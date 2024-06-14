@@ -2,10 +2,11 @@
   "name": "proyecto-node",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "start": "node --watch --no-warnings src/app.js",
+    "dev": "node --watch --no-warnings src/app.js",
+    "start": "node ./src/app.js",
     "stop-linux": "killall -9 node",
     "stop-windows": "taskkill /F /IM node.exe"
   },
@@ -13,6 +14,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-handlebars": "^7.1.2",
+    "socket.io": "^4.7.5",
+    "sweetalert2": "^11.11.1"
   }
 }

@@ -1,0 +1,38 @@
+<header>
+    <h1 class="title">Productos</h1>
+</header>
+<main>
+    <section>
+        <div class="container">
+            {{!-- <h3>Mensajes</h3>
+            <ul id="message-logs"></ul> --}}
+            <table class="tabla-carrito">
+                <thead>
+                    <tr>
+                        {{!-- <th></th> --}}
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Valor</th>
+                        {{!-- <th></th> --}}
+                    </tr>
+                </thead>
+                <tbody id="table-rows">
+                
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        {{!-- <td class="expande-columna">Total a Pagar</td>
+                        <td class="expande-columna" colSpan="2">Total: {total()}</td> --}}
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/api/public/js/products.js"></script>
