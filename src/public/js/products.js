@@ -11,7 +11,6 @@ function getProducts() {
 function buidRows(data) {
     tableRows.innerHTML = "";
     data.forEach((product) => {
-        console.log(product);
         tableRows.innerHTML += createHTML(product)
     })
 }
@@ -26,14 +25,14 @@ function createHTML(item) {
 
 getProducts();
 
-socket.on("refresh-products", (data) => {
-    console.log("Conectado desde el cliente");
-    // const messageLogs = document.getElementById("message-logs");
-    // messageLogs.innerText = "";
-
-    // data.messages.forEach((message) => {
-    //     const li = document.createElement("li");
-    //     li.innerHTML = `${message.user.name} dice: <b>${message.message}</b>`;
-    //     messageLogs.append(li);
-    // });
+socket.on("refresh-data", (data) => {
+    buidRows(data);
+    Swal.fire({
+        toast: true,
+        position: "top-end",
+        timer: 3000,
+        timeProgressBar: true,
+        title: "Se actualizaron los productos",
+        icon: "success",
+    });
 });

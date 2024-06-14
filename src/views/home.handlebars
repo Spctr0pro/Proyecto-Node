@@ -12,8 +12,14 @@
                         <th>Valor</th>
                     </tr>
                 </thead>
-                <tbody id="table-rows">
-                
+                <tbody>
+                    {{#each data.products}}
+                    <tr key={{this.id}}>
+                        <td>{{this.title}}</td>
+                        <td>{{this.stock}}</td>
+                        <td class="texto-derecha">$ {{this.price}}</td>
+                    </tr>
+                    {{/each}}
                 </tbody>
                 <tfoot>
                     <tr>
@@ -26,7 +32,3 @@
         </div>
     </section>
 </main>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script src="/api/public/js/products.js"></script>

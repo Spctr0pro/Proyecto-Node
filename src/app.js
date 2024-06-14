@@ -13,10 +13,18 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Método oyente de solicitudes
+const appHTTP = app.listen(PORT, () => {
+    console.log(`Ejecutándose en http://${HOST}:${PORT}`);
+});
+
+// Configuración del servidor de websocket
+const socket = appSocket.config(appHTTP);
+
 // Enrutadores
-app.use('/api/products', productsRouter);
+app.use('/api/products', productsRouter(socket));
 app.use('/api/carts', cartsRouter);
-app.use("/products", homeRouter);
+app.use("/", homeRouter);
 
 handlebars.config(app);
 app.use("/api/public", express.static(paths.public));
@@ -32,14 +40,3 @@ app.use((error, req, res) => {
     res.status(500).send("<h1>Error 500</h1><h3>Se ha generado un error en el servidor</h3>");
 });
 
-// app.listen(PORT, () => {
-//     console.log(`Ejecutandose en http://${HOST}:${PORT}`);
-// })
-
-// Método oyente de solicitudes
-const appHTTP = app.listen(PORT, () => {
-    console.log(`Ejecutándose en http://${HOST}:${PORT}`);
-});
-
-// Configuración del servidor de websocket
-appSocket.config(appHTTP);

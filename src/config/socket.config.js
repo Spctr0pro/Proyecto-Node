@@ -7,7 +7,7 @@ const config = (serverHTTP) => {
     serverSocket.on("connection", (socket) => {
         console.log("Socket connected");
 
-        socket.on("refresh-productos", (data) => {
+        socket.on("refresh-data", (data) => {
             const { user, message } = data;
 
             messages.push({ user, message });
@@ -15,6 +15,7 @@ const config = (serverHTTP) => {
             serverSocket.emit("message-logs", { messages });
         });
     });
+    return serverSocket;
 };
 
 export default {

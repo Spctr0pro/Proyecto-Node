@@ -35,4 +35,9 @@
     align-items: flex-start;
     flex-wrap: wrap;
     justify-content: center;
-  }
+}
+
+.swal2-styled {
+    width: 100px;
+    padding: 0px 0px 0px 0px;
+}
