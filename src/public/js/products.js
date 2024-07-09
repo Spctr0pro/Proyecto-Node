@@ -5,7 +5,7 @@ function getProducts() {
     tableRows.innerHTML = "";
     fetch("http://localhost:8080/api/products")
         .then((response) => response.json())
-        .then((data) => buidRows(data.products))
+        .then((data) => buidRows(data.products.docs))
 }
 
 function buidRows(data) {

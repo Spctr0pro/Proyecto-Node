@@ -1,99 +1,135 @@
-import fs from "fs";
-import path from "path";
+import mongoose from "mongoose";
+import ProductModel from "../models/product.model.js";
+import mongoDB from "../config/mongoose.config.js";
+import fileSystem from "../utils/fileSystem.js";
+
+import {
+    ERROR_INVALID_ID,
+    ERROR_NOT_FOUND_ID,
+} from "../constants/messages.constant.js";
 
 export default class ProductManager {
-    #pathProductJSON;
+    #productModel;
 
     constructor() {
-        this.#pathProductJSON = path.join("src/data", "products.json");
+        this.#productModel = ProductModel;
     }
 
-    #getProductsPrivate = async () => {
-        if (!fs.existsSync(this.#pathProductJSON)) {
-            await fs.promises.writeFile(this.#pathProductJSON, "[]");
+    #getProductsPrivate = async (paramFilters) => {
+        try {
+            const $and = [];
+
+            if (paramFilters?.title) $and.push({ title: paramFilters.title });
+            if (paramFilters?.description) $and.push({ description: paramFilters.description });
+            if (paramFilters?.code) $and.push({ code: paramFilters.code });
+            const filters = $and.length > 0 ? { $and } : {};
+
+            const sort = {
+                asc: { name: 1 },
+                desc: { name: -1 },
+            };
+
+            const paginationOptions = {
+                limit: paramFilters?.limit ?? 10,
+                page: paramFilters?.page ?? 1,
+                sort: sort[paramFilters?.sort] ?? {},
+                //populate: "products",
+                lean: true,
+            };
+            const productsFound = await this.#productModel.paginate(filters, paginationOptions);
+            return productsFound;
         }
-        const productsJSON = await fs.promises.readFile(this.#pathProductJSON, "utf8");
-        return JSON.parse(productsJSON);
+        catch (error) {
+            throw new Error(error.message);
+        }
     }
 
     #getProductsFilterPrivate = async (pid) => {
-        if (!fs.existsSync(this.#pathProductJSON)) {
-            await fs.promises.writeFile(this.#pathProductJSON, "[]");
-        }
-        const productsJSON = await fs.promises.readFile(this.#pathProductJSON, "utf8");
-        const p = JSON.parse(productsJSON).filter((p) => {
-            return p.id === Number(pid)
-        });
-        return p;
-    }
-
-    #persistProduct = async (newProduct) => {
-        const products = await this.#getProductsPrivate();
-        products.push(newProduct);
-
-        const updateProductsJSON = JSON.stringify(products, null, "\t");
-        await fs.promises.writeFile(this.#pathProductJSON, updateProductsJSON);
-    }
-
-    #updateProduct = async (products) => {
-        const updateProductsJSON = JSON.stringify(products, null, "\t");
-        await fs.promises.writeFile(this.#pathProductJSON, updateProductsJSON);
-    }
-
-    addProduct = async (title, description, code, price, status, stock, thumbnails) => {
-        const products = await this.#getProductsPrivate()
-        let max
-        if (products.length > 0) {
-            max = Math.max.apply(null, products.map(item => item.id));
-        }
-        else { max = 0; }
-        const newProduct = {
-            id: (max == null || max == undefined ? 0 : max) + 1,
-            title,
-            description,
-            code,
-            price,
-            status: true,
-            stock,
-            thumbnails
-        };
-
-        await this.#persistProduct(newProduct);
-    }
-
-    updateProduct = async (pid, title, description, code, price, status, stock, thumbnails) => {
-        const products = await this.#getProductsPrivate()
-
-        products.map((product) => {
-            if (product.id === Number(pid)) {
-                product.title = title,
-                    product.description = description,
-                    product.code = code,
-                    product.price = price,
-                    product.status = !status ? true : status,
-                    product.stock = stock,
-                    product.thumbnails = thumbnails
+        try {
+            if (!mongoDB.isValidID(pid)) {
+                throw new Error(ERROR_INVALID_ID);
             }
-        })
 
-        const updateProductsJSON = JSON.stringify(products, null, "\t");
-        await fs.promises.writeFile(this.#pathProductJSON, updateProductsJSON);
+            const productFound = await this.#productModel.findById(pid);//.populate("courses");
+
+            if (!productFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+
+            return productFound;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 
-    getProducts = async () => {
-        const products = await this.#getProductsPrivate();
+    #persistProduct = async (data, file) => {
+        try {
+            const productCreated = new ProductModel(data);
+            productCreated.thumbnails = file?.filename ?? null;
+            productCreated.status = true;
+            await productCreated.save();
+
+            return productCreated;
+        } catch (error) {
+            console.log(error.message);
+            if (file) await fileSystem.deleteImage(file.filename);
+
+            if (error instanceof mongoose.Error.ValidationError) {
+                error.message = Object.values(error.errors)[0];
+            }
+
+            throw new Error(error.message);
+        }
+    }
+
+    #updateProduct = async (id, data, file) => {
+        try {
+            if (!mongoDB.isValidID(id)) {
+                throw new Error(ERROR_INVALID_ID);
+            }
+            const productFound = await this.#productModel.findById(id);
+            const currentThumbnail = productFound.thumbnails;
+            const newThumbnail = file?.filename;
+
+            if (!productFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+
+            productFound.title = data.title;
+            productFound.description = data.description;
+            productFound.stock = data.stock;
+            productFound.price = data.price;
+            productFound.thumbnails = newThumbnail ?? currentThumbnail;
+
+            await productFound.save();
+            if (file && newThumbnail != currentThumbnail) {
+                await fileSystem.deleteImage(currentThumbnail);
+            }
+
+            return productFound;
+        } catch (error) {
+            if (file) await fileSystem.deleteImage(file.filename);
+
+            if (error instanceof mongoose.Error.ValidationError) {
+                error.message = Object.values(error.errors)[0];
+            }
+
+            throw new Error(error.message);
+        }
+    }
+
+    addProduct = async (newProduct, file) => {
+        await this.#persistProduct(newProduct, file);
+    }
+
+    updateProduct = async (id, data, file) => {
+        const productUpdated = await this.#updateProduct(id, data, file)
+        return productUpdated;
+    }
+
+    getProducts = async (paramFilters) => {
+        const products = await this.#getProductsPrivate(paramFilters);
         return products;
-    }
-
-    getProductsLimit = async (limit) => {
-        const products = await this.#getProductsPrivate();
-        const limitProducts = []
-        products.map(product => {
-            if (limitProducts.length < limit) {
-                limitProducts.push(product);
-            }
-        })
-        return limitProducts;
     }
 
     getProductById = async (pid) => {
@@ -102,7 +138,23 @@ export default class ProductManager {
     }
 
     deleteProduct = async (pid) => {
-        const products = await this.#getProductsPrivate();
-        await this.#updateProduct(products.filter(prod => prod.id !== Number(pid)));
+        try {
+            if (!mongoDB.isValidID(id)) {
+                throw new Error(ERROR_INVALID_ID);
+            }
+
+            const productFound = await this.#productModel.findById(pid);
+
+            if (!productFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+
+            await this.#productModel.findByIdAndDelete(pid);
+            await fileSystem.deleteImage(productFound.thumbnails);
+
+            return productFound;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 }

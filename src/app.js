@@ -1,10 +1,11 @@
 import paths from "./utils/paths.js";
 import express from "express";
-import cartsRouter from "./routes/carts.router.js";
-import productsRouter from "./routes/products.router.js";
+import cartsRouter from "./routes/api.carts.router.js";
+import productsRouter from "./routes/api.products.router.js";
 import handlebars from "./config/handlebars.config.js";
 import appSocket from "./config/socket.config.js";
-import homeRouter from "./routes/home.router.js";
+import homeRouter from "./routes/app.home.router.js";
+import mongoDB from "./config/mongoose.config.js";
 
 const PORT = 8080;
 const HOST = "localhost";
@@ -16,6 +17,7 @@ app.use(express.json());
 // Método oyente de solicitudes
 const appHTTP = app.listen(PORT, () => {
     console.log(`Ejecutándose en http://${HOST}:${PORT}`);
+    mongoDB.connectDB();
 });
 
 // Configuración del servidor de websocket
@@ -26,8 +28,10 @@ app.use('/api/products', productsRouter(socket));
 app.use('/api/carts', cartsRouter);
 app.use("/", homeRouter);
 
-handlebars.config(app);
 app.use("/api/public", express.static(paths.public));
+handlebars.config(app);
+
+
 
 // Control de rutas inexistentes
 app.use("*", (req, res) => {
@@ -39,4 +43,3 @@ app.use((error, req, res) => {
     console.log("Error:", error.message);
     res.status(500).send("<h1>Error 500</h1><h3>Se ha generado un error en el servidor</h3>");
 });
-

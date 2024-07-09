@@ -1,3 +1,8 @@
+import mongoose from "mongoose";
+import CartModel from "../models/cart.modelo.js";
+import mongoDB from "../config/mongoose.config.js";
+import fileSystem from "../utils/fileSystem.js";
+
 import fs from "fs";
 import path from "path";
 

@@ -13,7 +13,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each data.products}}
+                    {{#each data.products.docs}}
                     <tr key={{this.id}}>
                         <td>{{this.title}}</td>
                         <td>{{this.stock}}</td>
@@ -29,6 +29,32 @@
                     </tr>
                 </tfoot>
             </table>
+        </div>
+    </section>
+
+    <section class="container">
+        <h3>Controles</h3>
+        <div>
+            <div>
+                {{#if data.products.hasPrevPage}}
+                <a href="/?page={{data.products.prevPage}}"><button>Anterior</button></a>
+                {{/if}}
+
+                {{#if data.products.hasNextPage}}
+                <a href="/?page={{data.products.nextPage}}{{data.products.sort}}"><button>Siguiente</button></a>
+                {{/if}}
+
+                <a href="/?page={{data.products.page}}&sort=asc"><button>⬇</button></a>
+                <a href="/?page={{data.products.page}}&sort=desc"><button>⬆</button></a>
+                <a href="/?page={{data.products.page}}"><button>⬌</button></a>
+
+                <p>
+                    Página <span id="page">{{data.products.page}}</span> de <span id="total-pages">{{data.products.totalPages}}</span>
+                    <br>
+                    <span>{{data.products.totalDocs}}</span> Documentos
+                </p>
+
+            </div>
         </div>
     </section>
 </main>
