@@ -3,42 +3,67 @@ import CartModel from "../models/cart.modelo.js";
 import mongoDB from "../config/mongoose.config.js";
 import fileSystem from "../utils/fileSystem.js";
 
-import fs from "fs";
-import path from "path";
+import {
+    ERROR_INVALID_ID,
+    ERROR_NOT_FOUND_ID,
+} from "../constants/messages.constant.js";
 
 export default class CartManager {
-    #pathCartJSON;
+    #cartModel;
 
     constructor() {
-        this.#pathCartJSON = path.join("src/data", "carts.json");
+        this.#cartModel = CartModel;
     }
 
-    #getCartsPrivate = async () => {
-        if (!fs.existsSync(this.#pathCartJSON)) {
-            await fs.promises.writeFile(this.#pathCartJSON, "[]");
+    #getCartsPrivate = async (paramFilters) => {
+        try {
+            const $and = [];
+
+            if (paramFilters?.status) $and.push({ name: paramFilters.status });
+            const filters = $and.length > 0 ? { $and } : {};
+
+            const sort = {
+                asc: { status: 1 },
+                desc: { status: -1 },
+            };
+
+            const paginationOptions = {
+                limit: paramFilters?.limit ?? 10,
+                page: paramFilters?.page ?? 1,
+                sort: sort[paramFilters?.sort] ?? {},
+                lean: true,
+            };
+
+            const coursesFound = await this.#cartModel.paginate(filters, paginationOptions);
+            return coursesFound;
+        } catch (error) {
+            throw new Error(error.message);
         }
-        const cartsJSON = await fs.promises.readFile(this.#pathCartJSON, "utf8");
-        return JSON.parse(cartsJSON);
     }
 
-    #persistCart = async (newCart) => {
-        const carts = await this.#getCartsPrivate();
-        carts.push(newCart);
+    #persistCart = async (data) => {
+        try {
+            data.startDate = data.start_date;
+            data.endDate = data.end_date;
+            const cartCreated = new CartModel(data);
 
-        const updateCartsJSON = JSON.stringify(carts, null, "\t");
-        await fs.promises.writeFile(this.#pathCartJSON, updateCartsJSON);
+            await cartCreated.save();
+
+            return cartCreated;
+        } catch (error) {
+
+            if (error instanceof mongoose.Error.ValidationError) {
+                error.message = Object.values(error.errors)[0];
+            }
+
+            throw new Error(error.message);
+        }
     }
 
     addCart = async (products) => {
-        const carts = await this.#getCartsPrivate()
-        let max;
-        if(carts.length > 0){
-            max = Math.max.apply(null, carts.map(item => item.id));
-        }else{ max = 0; }
-        
         const newCart = {
-            id: max + 1,// Debe autogenerarse
-            products
+            products,
+            status: true
         };
 
         await this.#persistCart(newCart);
@@ -50,33 +75,60 @@ export default class CartManager {
     }
 
     getCartsById = async (cid) => {
-        const carts = await this.#getCartsPrivate();
-        return carts.find(cart => cart.id === Number(cid));
+        try {
+            if (!mongoDB.isValidID(id)) {
+                throw new Error(ERROR_INVALID_ID);
+            }
+
+            const cartFound = await this.#cartModel.findById(id);//.populate("products");
+
+            if (!cartFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+
+            return cartFound;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 
     updateCarts = async (cid, pid) => {
-        const carts = await this.#getCartsPrivate();
-        
-        carts.map((cart) => {
-            if(cart.id === Number(cid)){
-                if(cart.products.length > 0){
-                    if(cart.products.find(p => p.id === Number(pid))){
-                        cart.products.map((product) => {
-                            if(product.id === Number(pid)){
-                                product.quantity = product.quantity + 1; 
-                            }
-                        });
-                    }
-                    else{
-                        cart.products.push({"id": Number(pid), "quantity": 1})    
-                    }
-                }
-                else{
-                    cart.products.push({"id": Number(pid), "quantity": 1})
-                }
+        try {
+            if (!mongoDB.isValidID(cid) || !mongoDB.isValidID(pid)) {
+                throw new Error(ERROR_INVALID_ID);
             }
-        });
-        const updateCartsJSON = JSON.stringify(carts, null, "\t");
-        await fs.promises.writeFile(this.#pathCartJSON, updateCartsJSON);
+
+            const cartFound = await this.#cartModel.findById(cid);
+
+            if (!cartFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+            const productFound = cartFound.products.find((p) => p._id === pid)
+            if (productFound) {
+                const updated = await this.#cartModel.findOneAndUpdate(
+                    { _id: cid, 'products._id': pid },
+                    { $set: { "products.$.quantity": productFound.quantity + 1 } },
+                    {
+                        new: true
+                    }
+                )
+                return updated;
+            }
+            else {
+                const newProduct = {
+                    _id: pid,
+                    quantity: 1
+                }
+                cartFound.products.push(newProduct);
+                await cartFound.save();
+            }
+            return cartFound;
+        } catch (error) {
+            if (error instanceof mongoose.Error.ValidationError) {
+                error.message = Object.values(error.errors)[0];
+            }
+
+            throw new Error(error.message);
+        }
     }
 }

@@ -2,17 +2,11 @@ import { Schema, model } from "mongoose";
 import paginate from "mongoose-paginate-v2";
 
 const cartSchema = new Schema({
-    products: {
-        index: { id: "idx_name" },
-        type: Array,
-        required: [ false ],
-        uppercase: false,
-        trim: true
-    },
+    products: [{ _id: String, quantity: Number }],
     status: {
         type: Boolean,
         required: [ false ],
-    }
+    },
 }, {
     timestamps: true, // Añade timestamps para generar createdAt y updatedAt
     toJSON: { virtuals: true }, // Permite que los campos virtuales se incluyan en el JSON.

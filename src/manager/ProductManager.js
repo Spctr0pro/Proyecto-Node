@@ -25,8 +25,8 @@ export default class ProductManager {
             const filters = $and.length > 0 ? { $and } : {};
 
             const sort = {
-                asc: { name: 1 },
-                desc: { name: -1 },
+                asc: { price: 1 },
+                desc: { price: -1 },
             };
 
             const paginationOptions = {
