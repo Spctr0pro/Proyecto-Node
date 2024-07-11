@@ -60,9 +60,9 @@ export default class CartManager {
         }
     }
 
-    addCart = async (products) => {
+    addCart = async (data) => {
         const newCart = {
-            products,
+            products: data,
             status: true
         };
 
@@ -80,7 +80,7 @@ export default class CartManager {
                 throw new Error(ERROR_INVALID_ID);
             }
 
-            const cartFound = await this.#cartModel.findById(id);//.populate("products");
+            const cartFound = await this.#cartModel.findById(cid);//.populate("products");
 
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
@@ -92,7 +92,7 @@ export default class CartManager {
         }
     }
 
-    updateCarts = async (cid, pid) => {
+    updateCarts = async (cid, pid, quantity) => {
         try {
             if (!mongoDB.isValidID(cid) || !mongoDB.isValidID(pid)) {
                 throw new Error(ERROR_INVALID_ID);
@@ -105,9 +105,10 @@ export default class CartManager {
             }
             const productFound = cartFound.products.find((p) => p._id === pid)
             if (productFound) {
+                // ACTUALIZA EL ARREGLO DE PRODUCTOS DEL CARRITO
                 const updated = await this.#cartModel.findOneAndUpdate(
                     { _id: cid, 'products._id': pid },
-                    { $set: { "products.$.quantity": productFound.quantity + 1 } },
+                    { $set: { "products.$.quantity": quantity } },
                     {
                         new: true
                     }
@@ -115,6 +116,7 @@ export default class CartManager {
                 return updated;
             }
             else {
+                // CREATE EL JSON PARA AÑADIRLO AL CARRITO CUANDO EL PRODUCTO NO EXISTE EN EL CARRITO
                 const newProduct = {
                     _id: pid,
                     quantity: 1
@@ -123,6 +125,92 @@ export default class CartManager {
                 await cartFound.save();
             }
             return cartFound;
+        } catch (error) {
+            if (error instanceof mongoose.Error.ValidationError) {
+                error.message = Object.values(error.errors)[0];
+            }
+
+            throw new Error(error.message);
+        }
+    }
+
+    deleteProductCarts = async (cid, pid) => {
+        try {
+            if (!mongoDB.isValidID(cid) || !mongoDB.isValidID(pid)) {
+                throw new Error(ERROR_INVALID_ID);
+            }
+
+            const cartFound = await this.#cartModel.findById(cid);
+
+            if (!cartFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+            const productFound = await this.#cartModel.findById(id);
+
+            if (!productFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+            cartFound.products.pull({ _id: pid })
+            cartFound.save();
+            return cartFound;
+        } catch (error) {
+            if (error instanceof mongoose.Error.ValidationError) {
+                error.message = Object.values(error.errors)[0];
+            }
+
+            throw new Error(error.message);
+        }
+    }
+
+    updateProductCarts = async (cid, data) => {
+        try {
+            if (!mongoDB.isValidID(cid)) {
+                throw new Error(ERROR_INVALID_ID);
+            }
+
+            const cartFound = await this.#cartModel.findById(cid);
+
+            if (!cartFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+            
+            const updated = await this.#cartModel.findOneAndUpdate(
+                { _id: cid },
+                { $set: { "products": data } },
+                {
+                    new: true
+                }
+            )
+            return updated;
+        } catch (error) {
+            if (error instanceof mongoose.Error.ValidationError) {
+                error.message = Object.values(error.errors)[0];
+            }
+
+            throw new Error(error.message);
+        }
+    }
+
+    removeProductsCart = async (cid) => {
+        try {
+            if (!mongoDB.isValidID(cid)) {
+                throw new Error(ERROR_INVALID_ID);
+            }
+
+            const cartFound = await this.#cartModel.findById(cid);
+
+            if (!cartFound) {
+                throw new Error(ERROR_NOT_FOUND_ID);
+            }
+            
+            const updated = await this.#cartModel.findOneAndUpdate(
+                { _id: cid },
+                { $set: { "products": [] } },
+                {
+                    new: true
+                }
+            )
+            return updated;
         } catch (error) {
             if (error instanceof mongoose.Error.ValidationError) {
                 error.message = Object.values(error.errors)[0];

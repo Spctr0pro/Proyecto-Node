@@ -46,6 +46,12 @@ const productSchema = new Schema({
         required: [ false, "La imagen es obligatoria" ],
         trim: true,
     },
+    category: {
+        type: String,
+        required: [ true, "La categoría es obligatoria" ],
+        trim: true,
+        lowercase: true,
+    },
     // RELACIÓN FÍSICA 0:N
     // courses: [{
     //     type: Schema.Types.ObjectId,

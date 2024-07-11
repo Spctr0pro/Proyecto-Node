@@ -15,6 +15,7 @@ const errorHandler = (res, message) => {
 const router = Router();
 const cartsManager = new CartManager();
 
+// FALTA IMPLEMENTAR POPULATE 
 router.get("/", async (req, res) => {
     try{
         const carts = await cartsManager.getCarts();
@@ -50,10 +51,55 @@ router.post("/", async (req, res) => {
 router.post("/:cid/product/:pid", async (req, res) => {
     try{
         const { cid, pid } = req.params;
+        const { quantity } = req.body;
+        if(!cid || !pid || !quantity){
+            return res.status(400).send({"error": "Debe enviar toda la información necesaria"})
+        }
+        await cartsManager.updateCarts(cid, pid, quantity);
+        res.status(201).send({ status: "success" })
+    }
+    catch(error){
+        errorHandler(res, error.message);
+    }
+});
+
+router.delete("/:cid/product/:pid", async (req, res) => {
+    try{
+        const { cid, pid } = req.params;
         if(!cid || !pid){
             return res.status(400).send({"error": "Debe enviar toda la información necesaria"})
         }
-        await cartsManager.updateCarts(cid, pid);
+        await cartsManager.deleteProductCarts(cid, pid);
+        res.status(201).send({ status: "success" })
+    }
+    catch(error){
+        errorHandler(res, error.message);
+    }
+});
+
+router.delete("/:cid", async (req, res) => {
+    try{
+        const { cid } = req.params;
+        if(!cid){
+            return res.status(400).send({"error": "Debe enviar toda la información necesaria"})
+        }
+        await cartsManager.removeProductsCart(cid);
+        res.status(201).send({ status: "success" })
+    }
+    catch(error){
+        errorHandler(res, error.message);
+    }
+});
+
+router.put("/:cid", async (req, res) => {
+    try{
+        const { cid } = req.params;
+        const { products } = req.body;
+        console.log(products);
+        if(!cid){
+            return res.status(400).send({"error": "Debe enviar toda la información necesaria"})
+        }
+        await cartsManager.updateProductCarts(cid, products);
         res.status(201).send({ status: "success" })
     }
     catch(error){

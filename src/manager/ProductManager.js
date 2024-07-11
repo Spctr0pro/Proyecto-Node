@@ -19,16 +19,15 @@ export default class ProductManager {
         try {
             const $and = [];
 
+            if (paramFilters?.category) $and.push({ category: paramFilters.category });
+            if (paramFilters?.status) $and.push({ status: paramFilters.status });
             if (paramFilters?.title) $and.push({ title: paramFilters.title });
-            if (paramFilters?.description) $and.push({ description: paramFilters.description });
-            if (paramFilters?.code) $and.push({ code: paramFilters.code });
             const filters = $and.length > 0 ? { $and } : {};
 
             const sort = {
                 asc: { price: 1 },
                 desc: { price: -1 },
             };
-
             const paginationOptions = {
                 limit: paramFilters?.limit ?? 10,
                 page: paramFilters?.page ?? 1,
@@ -37,6 +36,8 @@ export default class ProductManager {
                 lean: true,
             };
             const productsFound = await this.#productModel.paginate(filters, paginationOptions);
+            productsFound.prevLink = productsFound.hasPrevPage === false ? null : "http://localhost:8080/api/products?page=" + productsFound.prevPage;
+            productsFound.nextLink = productsFound.hasNextPage === false ? null : "http://localhost:8080/api/products?page=" + productsFound.nextPage;
             return productsFound;
         }
         catch (error) {
@@ -100,6 +101,7 @@ export default class ProductManager {
             productFound.stock = data.stock;
             productFound.price = data.price;
             productFound.thumbnails = newThumbnail ?? currentThumbnail;
+            productFound.category = data.category;
 
             await productFound.save();
             if (file && newThumbnail != currentThumbnail) {

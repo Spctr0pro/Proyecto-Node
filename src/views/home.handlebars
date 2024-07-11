@@ -2,6 +2,13 @@
     <h1 class="title">{{title}}</h1>
 </header>
 <main>
+    <section class="container">
+        <div>
+                <a href="/?page={{data.page}}&sort=asc"><button>ACSENDENTE</button></a>
+                <a href="/?page={{data.page}}&sort=desc"><button>DESCENDENTE</button></a>
+                <a href="/?page={{data.page}}"><button>REMOVER ORDEN</button></a>
+            </div>
+    </section>
     <section>
         <div class="container">
             <table class="tabla-carrito">
@@ -13,7 +20,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each data.products.docs}}
+                    {{#each data.docs}}
                     <tr key={{this.id}}>
                         <td>{{this.title}}</td>
                         <td>{{this.stock}}</td>
@@ -33,27 +40,23 @@
     </section>
 
     <section class="container">
-        <h3>Controles</h3>
         <div>
             <div>
-                {{#if data.products.hasPrevPage}}
-                <a href="/?page={{data.products.prevPage}}"><button>Anterior</button></a>
+                {{#if data.hasPrevPage}}
+                <a href="/?page={{data.prevPage}}"><button>Anterior</button></a>
                 {{/if}}
 
-                {{#if data.products.hasNextPage}}
-                <a href="/?page={{data.products.nextPage}}{{data.products.sort}}"><button>Siguiente</button></a>
+                {{#if data.hasNextPage}}
+                <a href="/?page={{data.nextPage}}{{data.sort}}"><button>Siguiente</button></a>
                 {{/if}}
-
-                <a href="/?page={{data.products.page}}&sort=asc"><button>⬇</button></a>
-                <a href="/?page={{data.products.page}}&sort=desc"><button>⬆</button></a>
-                <a href="/?page={{data.products.page}}"><button>⬌</button></a>
-
+            </div>
+            <div>
                 <p>
-                    Página <span id="page">{{data.products.page}}</span> de <span id="total-pages">{{data.products.totalPages}}</span>
+                    Página <span id="page">{{data.page}}</span> de <span
+                        id="total-pages">{{data.totalPages}}</span>
                     <br>
-                    <span>{{data.products.totalDocs}}</span> Documentos
+                    <span>{{data.totalDocs}}</span> Documentos
                 </p>
-
             </div>
         </div>
     </section>

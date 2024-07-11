@@ -6,7 +6,7 @@ const connectDB = () => {
     const options = {
         useNewUrlParser: true, // Utiliza el nuevo motor de análisis de URL de MongoDB.
         useUnifiedTopology: true, // Deshabilitar los métodos obsoletos.
-        dbName: "test", // Nombre de la base de datos.
+        dbName: "store", // Nombre de la base de datos.
     };
 
     connect(URI, options)
