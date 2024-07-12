@@ -52,11 +52,6 @@ const productSchema = new Schema({
         trim: true,
         lowercase: true,
     },
-    // RELACIÓN FÍSICA 0:N
-    // courses: [{
-    //     type: Schema.Types.ObjectId,
-    //     ref: "carts",
-    // }],
 }, {
     timestamps: true, // Añade timestamps para generar createdAt y updatedAt
 });
@@ -67,6 +62,6 @@ const productSchema = new Schema({
 // Agrega mongoose-paginate-v2 para habilitar las funcionalidades de paginación.
 productSchema.plugin(paginate);
 
-const ProductModel = model("Products", productSchema);
+const ProductModel = model("products", productSchema);
 
 export default ProductModel;

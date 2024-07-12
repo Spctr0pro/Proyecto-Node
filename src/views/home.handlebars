@@ -1,35 +1,50 @@
 <header>
     <h1 class="title">{{title}}</h1>
+    <script src="/api/public/js/addProductToCart.js"></script>
 </header>
 <main>
     <section class="container">
         <div>
-                <a href="/?page={{data.page}}&sort=asc"><button>ACSENDENTE</button></a>
-                <a href="/?page={{data.page}}&sort=desc"><button>DESCENDENTE</button></a>
-                <a href="/?page={{data.page}}"><button>REMOVER ORDEN</button></a>
-            </div>
+            <a href="/?page={{data.page}}&sort=asc"><button>ACSENDENTE</button></a>
+            <a href="/?page={{data.page}}&sort=desc"><button>DESCENDENTE</button></a>
+            <a href="/?page={{data.page}}"><button>REMOVER ORDEN</button></a>
+        </div>
     </section>
     <section>
         <div class="container">
             <table class="tabla-carrito">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Producto</th>
+                        <th>Categoría</th>
                         <th>Cantidad</th>
                         <th>Valor</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each data.docs}}
                     <tr key={{this.id}}>
+                        <td><img src="/api/public/images/{{this.thumbnails}}" alt="Imagen Producto" width="50px"
+                                height="60px"> </td>
                         <td>{{this.title}}</td>
+                        <td>{{this.category}}</td>
                         <td>{{this.stock}}</td>
                         <td class="texto-derecha">$ {{this.price}}</td>
+                        <td>
+                            {{#if this.stock }}
+                                <button id="btnAgregar" type="button" onClick="AddProduct(1)">Agregar</button>
+                            {{/if}}
+                        </td>
+                        {{!-- <td><button className="button-eliminar" type="button" onClick={()=>
+                                handleRemove(i.id)}>Eliminar</button></td> --}}
                     </tr>
                     {{/each}}
                 </tbody>
                 <tfoot>
                     <tr>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -52,8 +67,7 @@
             </div>
             <div>
                 <p>
-                    Página <span id="page">{{data.page}}</span> de <span
-                        id="total-pages">{{data.totalPages}}</span>
+                    Página <span id="page">{{data.page}}</span> de <span id="total-pages">{{data.totalPages}}</span>
                     <br>
                     <span>{{data.totalDocs}}</span> Documentos
                 </p>
@@ -61,3 +75,6 @@
         </div>
     </section>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+

@@ -15,7 +15,6 @@ const errorHandler = (res, message) => {
 const router = Router();
 const cartsManager = new CartManager();
 
-// FALTA IMPLEMENTAR POPULATE 
 router.get("/", async (req, res) => {
     try{
         const carts = await cartsManager.getCarts();

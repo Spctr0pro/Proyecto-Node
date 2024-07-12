@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import CartModel from "../models/cart.modelo.js";
 import mongoDB from "../config/mongoose.config.js";
-import fileSystem from "../utils/fileSystem.js";
 
 import {
     ERROR_INVALID_ID,
@@ -76,11 +75,11 @@ export default class CartManager {
 
     getCartsById = async (cid) => {
         try {
-            if (!mongoDB.isValidID(id)) {
+            if (!mongoDB.isValidID(cid)) {
                 throw new Error(ERROR_INVALID_ID);
             }
 
-            const cartFound = await this.#cartModel.findById(cid);//.populate("products");
+            const cartFound = await this.#cartModel.findById(cid).populate("products");
 
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
@@ -103,7 +102,8 @@ export default class CartManager {
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
-            const productFound = cartFound.products.find((p) => p._id === pid)
+            const productFound = cartFound.products.find((p) => p.id === pid)
+            
             if (productFound) {
                 // ACTUALIZA EL ARREGLO DE PRODUCTOS DEL CARRITO
                 const updated = await this.#cartModel.findOneAndUpdate(
@@ -119,7 +119,7 @@ export default class CartManager {
                 // CREATE EL JSON PARA AÑADIRLO AL CARRITO CUANDO EL PRODUCTO NO EXISTE EN EL CARRITO
                 const newProduct = {
                     _id: pid,
-                    quantity: 1
+                    quantity
                 }
                 cartFound.products.push(newProduct);
                 await cartFound.save();
@@ -145,7 +145,7 @@ export default class CartManager {
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
-            const productFound = await this.#cartModel.findById(id);
+            const productFound = cartFound.products.find((p) => p.id === pid);
 
             if (!productFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
