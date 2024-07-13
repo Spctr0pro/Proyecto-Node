@@ -25,6 +25,16 @@ router.get("/", async (req, res) => {
     }
 });
 
+router.get("/cart", async (req, res) => {
+    try{
+        const carts = await cartsManager.getCart();
+        res.status(200).send(carts);
+    }
+    catch(error){
+        errorHandler(res, error.message);
+    }
+});
+
 router.get("/:cid", async (req, res) => {
     try{
         const { cid } = req.params;
@@ -94,7 +104,6 @@ router.put("/:cid", async (req, res) => {
     try{
         const { cid } = req.params;
         const { products } = req.body;
-        console.log(products);
         if(!cid){
             return res.status(400).send({"error": "Debe enviar toda la información necesaria"})
         }

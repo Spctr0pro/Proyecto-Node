@@ -1,6 +1,5 @@
 <header>
     <h1 class="title">{{title}}</h1>
-    <script src="/api/public/js/addProductToCart.js"></script>
 </header>
 <main>
     <section class="container">
@@ -34,7 +33,7 @@
                         <td class="texto-derecha">$ {{this.price}}</td>
                         <td>
                             {{#if this.stock }}
-                                <button id="btnAgregar" type="button" onClick="AddProduct(1)">Agregar</button>
+                                <button id="btnAgregar" type="button" onClick="AddProduct('{{this.id}}')">Agregar</button>
                             {{/if}}
                         </td>
                         {{!-- <td><button className="button-eliminar" type="button" onClick={()=>
@@ -77,4 +76,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/api/public/js/addProductToCart.js"></script>
 

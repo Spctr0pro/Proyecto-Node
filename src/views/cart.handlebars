@@ -1,0 +1,42 @@
+<header>
+    <h1 class="title">{{title}}</h1>
+</header>
+<main>
+    <section>
+        <div class="container">
+            <table class="tabla-carrito">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each data.products}}
+                    <tr key={{this.productId._id}}>
+                        
+                        <td><img src="/api/public/images/{{this.productId.thumbnails}}" alt="Imagen Producto" width="50px"
+                                height="60px"> </td>
+                        <td>{{this.productId.title}}</td>
+                        <td>{{this.productId.category}}</td>
+                        <td>{{this.quantity}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+

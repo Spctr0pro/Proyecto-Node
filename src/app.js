@@ -1,11 +1,16 @@
 import paths from "./utils/paths.js";
 import express from "express";
-import cartsRouter from "./routes/api.carts.router.js";
-import productsRouter from "./routes/api.products.router.js";
 import handlebars from "./config/handlebars.config.js";
 import appSocket from "./config/socket.config.js";
-import homeRouter from "./routes/app.home.router.js";
+
+import apiCartsRouter from "./routes/api.carts.router.js";
+import apiProductsRouter from "./routes/api.products.router.js";
+import appHomeRouter from "./routes/app.home.router.js";
+import appCartRouter from "./routes/app.cart.router.js";
+
 import mongoDB from "./config/mongoose.config.js";
+
+
 
 const PORT = 8080;
 const HOST = "localhost";
@@ -24,9 +29,10 @@ const appHTTP = app.listen(PORT, () => {
 const socket = appSocket.config(appHTTP);
 
 // Enrutadores
-app.use('/api/products', productsRouter(socket));
-app.use('/api/carts', cartsRouter);
-app.use("/", homeRouter);
+app.use('/api/products', apiProductsRouter(socket));
+app.use('/api/carts', apiCartsRouter);
+app.use("/", appHomeRouter);
+app.use("/", appCartRouter);
 
 app.use("/api/public", express.static(paths.public));
 handlebars.config(app);

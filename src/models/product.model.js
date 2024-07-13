@@ -56,8 +56,17 @@ const productSchema = new Schema({
     timestamps: true, // Añade timestamps para generar createdAt y updatedAt
 });
 
-// Índice compuesto para nombre y apellido
-// productSchema.index({ title: 1, surname: 1 }, { name: "idx_name_surname" });
+// Middleware que elimina la referencia en los productos al eliminar el producto.
+productSchema.pre("findByIdAndDelete", async function(next) {
+    const CartsModel = this.model("carts");
+
+    await CartsModel.updateMany(
+        { "products.productId": this._id },
+        { $pull: { "products.productId": this._id } },
+    );
+
+    next();
+});
 
 // Agrega mongoose-paginate-v2 para habilitar las funcionalidades de paginación.
 productSchema.plugin(paginate);

@@ -21,6 +21,7 @@ export default class ProductManager {
 
             if (paramFilters?.category) $and.push({ category: paramFilters.category });
             if (paramFilters?.status) $and.push({ status: paramFilters.status });
+            if (paramFilters?.stock) $and.push({ stock: paramFilters.stock });
             if (paramFilters?.title) $and.push({ title: paramFilters.title });
             const filters = $and.length > 0 ? { $and } : {};
 

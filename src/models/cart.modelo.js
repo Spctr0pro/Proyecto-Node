@@ -3,9 +3,8 @@ import paginate from "mongoose-paginate-v2";
 
 const cartSchema = new Schema({
     products: [{
-        _id: {
+        productId: {
             type: Schema.ObjectId,
-            require: [true, "El id del producto es requerido"],
             ref: "products"
         },
         quantity: {
@@ -20,14 +19,6 @@ const cartSchema = new Schema({
 }, {
     timestamps: true, // Añade timestamps para generar createdAt y updatedAt
     toJSON: { virtuals: true }, // Permite que los campos virtuales se incluyan en el JSON.
-});
-
-// RELACIÓN INVERSA 0:N - Es una relación virtual que sirva para incluir los estudiantes del curso.
-cartSchema.virtual("productsCarts", {
-    ref: "products", // Nombre de la collection externa
-    localField: "_id", // Nombre del campo de referencia que esta en esta collection
-    foreignField: "products._id", // Nombre del campo de referencia que está en la collection externa
-    justOne: false,
 });
 
 // Agrega mongoose-paginate-v2 para habilitar las funcionalidades de paginación.

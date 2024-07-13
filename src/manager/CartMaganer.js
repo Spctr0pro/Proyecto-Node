@@ -42,6 +42,9 @@ export default class CartManager {
 
     #persistCart = async (data) => {
         try {
+            await this.#cartModel.updateMany({ status: true }
+                , { $set: { status: false } });
+
             data.startDate = data.start_date;
             data.endDate = data.end_date;
             const cartCreated = new CartModel(data);
@@ -65,7 +68,8 @@ export default class CartManager {
             status: true
         };
 
-        await this.#persistCart(newCart);
+        const cart = await this.#persistCart(newCart);
+        return cart;
     }
 
     getCarts = async () => {
@@ -79,12 +83,24 @@ export default class CartManager {
                 throw new Error(ERROR_INVALID_ID);
             }
 
-            const cartFound = await this.#cartModel.findById(cid).populate("products");
-
+            const cartFound = await this.#cartModel.findById(cid).populate("products.productId").lean();
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
 
+            return cartFound;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+    // CREA O DEVUELVE EL CARRITO ACTIVO
+    getCart = async () => {
+        try {
+            const cartFound = await this.#cartModel.find({ status: true });
+            if (!cartFound) {
+                const newCart = await this.addCart([]);
+                return newCart;
+            }
             return cartFound;
         } catch (error) {
             throw new Error(error.message);
@@ -102,13 +118,13 @@ export default class CartManager {
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
-            const productFound = cartFound.products.find((p) => p.id === pid)
-            
+            const productFound = cartFound.products.find((p) => p.productId == pid)
+
             if (productFound) {
                 // ACTUALIZA EL ARREGLO DE PRODUCTOS DEL CARRITO
                 const updated = await this.#cartModel.findOneAndUpdate(
-                    { _id: cid, 'products._id': pid },
-                    { $set: { "products.$.quantity": quantity } },
+                    { _id: cid, 'products.productId': pid },
+                    { $set: { "products.$.quantity": productFound.quantity + quantity } },
                     {
                         new: true
                     }
@@ -118,7 +134,7 @@ export default class CartManager {
             else {
                 // CREATE EL JSON PARA AÑADIRLO AL CARRITO CUANDO EL PRODUCTO NO EXISTE EN EL CARRITO
                 const newProduct = {
-                    _id: pid,
+                    productId: pid,
                     quantity
                 }
                 cartFound.products.push(newProduct);
@@ -145,12 +161,12 @@ export default class CartManager {
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
-            const productFound = cartFound.products.find((p) => p.id === pid);
+            const productFound = cartFound.products.find((p) => p.productId == pid);
 
             if (!productFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
-            cartFound.products.pull({ _id: pid })
+            cartFound.products.pull({ productId: pid })
             cartFound.save();
             return cartFound;
         } catch (error) {
@@ -173,7 +189,7 @@ export default class CartManager {
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
-            
+
             const updated = await this.#cartModel.findOneAndUpdate(
                 { _id: cid },
                 { $set: { "products": data } },
@@ -202,7 +218,7 @@ export default class CartManager {
             if (!cartFound) {
                 throw new Error(ERROR_NOT_FOUND_ID);
             }
-            
+
             const updated = await this.#cartModel.findOneAndUpdate(
                 { _id: cid },
                 { $set: { "products": [] } },
