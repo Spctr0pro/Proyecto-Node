@@ -1,8 +1,9 @@
 import { connect, Types } from "mongoose";
+import conn from "../config/connection.json" assert { type: "json" };
+
 
 const connectDB = () => {
-    const URI = "mongodb+srv://ivantorop:gO3HOAs3EmMmHj1V@cluster0.qbjax5p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
+    const URI = `mongodb+srv://${conn.user}:${conn.pass}@cluster0.qbjax5p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
     const options = {
         useNewUrlParser: true, // Utiliza el nuevo motor de análisis de URL de MongoDB.
         useUnifiedTopology: true, // Deshabilitar los métodos obsoletos.

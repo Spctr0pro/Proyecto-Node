@@ -15,6 +15,7 @@ const errorHandler = (res, message) => {
 const router = Router();
 const cartsManager = new CartManager();
 
+// RECUPERA TODOS LOS CARRITOS (http://localhost:8080/api/carts)
 router.get("/", async (req, res) => {
     try{
         const carts = await cartsManager.getCarts();
@@ -25,6 +26,7 @@ router.get("/", async (req, res) => {
     }
 });
 
+// RECUPERA LOS PRODUCTOS DEL CARRITO ACTIVO (http://localhost:8080/api/carts/cart)
 router.get("/cart", async (req, res) => {
     try{
         const carts = await cartsManager.getCart();
@@ -35,6 +37,7 @@ router.get("/cart", async (req, res) => {
     }
 });
 
+//RECUPERA LOS PRODUCTOS DEL CARRITO CONSULTADO (http://localhost:8080/api/carts/6691bf6a70584a435f112683)
 router.get("/:cid", async (req, res) => {
     try{
         const { cid } = req.params;
@@ -46,6 +49,8 @@ router.get("/:cid", async (req, res) => {
     }
 });
 
+//CREA UN CARRITO (http://localhost:8080/api/carts)
+//EN EL BODY DE LA PETICION POST SE DEBE ENVIAR JSON
 router.post("/", async (req, res) => {
     try{
         const { products } = req.body;
@@ -56,7 +61,9 @@ router.post("/", async (req, res) => {
         errorHandler(res, error.message);
     }
 });
-
+//ACTUALIZA EL PRODUCTO DEL CARRITO
+//http://localhost:8080/api/carts/6691bf6a70584a435f112683/product/668efba8651ced075c467b5d
+//EN EL BODY SE DEBE ENVIAR LA CANTIDAD EN FORMATO JSON
 router.post("/:cid/product/:pid", async (req, res) => {
     try{
         const { cid, pid } = req.params;
@@ -71,7 +78,8 @@ router.post("/:cid/product/:pid", async (req, res) => {
         errorHandler(res, error.message);
     }
 });
-
+//ELIMINA UN PRODUCTO DEL CARRITO
+//http://localhost:8080/api/carts/6691bf6a70584a435f112683/product/668efba8651ced075c467b5d
 router.delete("/:cid/product/:pid", async (req, res) => {
     try{
         const { cid, pid } = req.params;
@@ -85,7 +93,8 @@ router.delete("/:cid/product/:pid", async (req, res) => {
         errorHandler(res, error.message);
     }
 });
-
+//ELIMINA UN CARRITO
+//http://localhost:8080/api/carts/6691bf6a70584a435f112683
 router.delete("/:cid", async (req, res) => {
     try{
         const { cid } = req.params;
@@ -99,7 +108,8 @@ router.delete("/:cid", async (req, res) => {
         errorHandler(res, error.message);
     }
 });
-
+//ACTUALIZA LOS PRODUCTOS DE UN CARRITO
+//http://localhost:8080/api/carts/6691bf6a70584a435f112683
 router.put("/:cid", async (req, res) => {
     try{
         const { cid } = req.params;

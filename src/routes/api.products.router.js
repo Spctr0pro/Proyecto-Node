@@ -22,7 +22,8 @@ const productRoutes = (io) => {
         console.log(products);
         io.emit("refresh-data", products.docs);
     }
-
+    //RECUPERA TODOS LOS PRODUCTOS
+    //http://localhost:8080/api/products
     router.get("/", async (req, res) => {
         try {
             let products;
@@ -33,7 +34,8 @@ const productRoutes = (io) => {
             errorHandler(res, error.message);
         }
     });
-
+    //RECUPERA UN PRODUSTO
+    //http://localhost:8080/api/products/668efb63651ced075c467b58
     router.get("/:pid", async (req, res) => {
         try {
             const { pid } = req.params;
@@ -47,7 +49,9 @@ const productRoutes = (io) => {
             errorHandler(res, error.message);
         }
     });
-
+    //AGREGA UN PRODUSTO
+    //DEBE ENVIARSE ESTRUCTURA NECESARIA EN EL BODY
+    //http://localhost:8080/api/products
     router.post("/", uploader.single("file"), async (req, res, socketIO) => {
         try {
             const { file } = req;
@@ -73,7 +77,9 @@ const productRoutes = (io) => {
             errorHandler(res, error.message);
         }
     });
-
+    //ACTUALIZA UN PRODUSTO
+    //DEBE ENVIARSE ESTRUCTURA NECESARIA EN EL BODY
+    //http://localhost:8080/api/products
     router.put("/:pid", uploader.single("file"), async (req, res) => {
         try {
             const { pid } = req.params;
@@ -105,7 +111,9 @@ const productRoutes = (io) => {
             errorHandler(res, error.message);
         }
     });
-
+    //ELIMINA UN PRODUSTO
+    //DEBE ENVIARSE ESTRUCTURA NECESARIA EN EL BODY
+    //http://localhost:8080/api/products/668efba8651ced075c467b5d
     router.delete("/:pid", async (req, res) => {
         try {
             const { pid } = req.params;
